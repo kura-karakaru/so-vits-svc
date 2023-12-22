@@ -1,4 +1,6 @@
-./dataset/44k/nyaru/000003.wav
-./dataset/44k/nyaru/000007.wav
-./dataset/44k/taffy/000558.wav
-./dataset/44k/taffy/000556.wav
+./dataset/44k/jvs001/VOICEACTRESS100_077.wav
+./dataset/44k/jvs002/VOICEACTRESS100_051.wav
+./dataset/44k/jvs002/VOICEACTRESS100_005.wav
+./dataset/44k/jvs001/VOICEACTRESS100_009.wav
+./dataset/44k/tsukuyomi/VOICEACTRESS100_083.wav
+./dataset/44k/tsukuyomi/VOICEACTRESS100_048.wav
