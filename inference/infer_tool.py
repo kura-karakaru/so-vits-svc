@@ -287,7 +287,7 @@ class Svc(object):
             if speaker_id is None:
                 raise RuntimeError("The name you entered is not in the speaker list!")
             """
-            sid = torch.from_numpy(voice_pkl).to(self.dev).unsqueeze(0)
+            sid = torch.from_numpy(voice_pkl).to(self.dev).unsqueeze(0).unsqueeze(0)
             c, f0, uv = self.get_unit_f0(wav, tran, cluster_infer_ratio, speaker, f0_filter,f0_predictor,cr_threshold=cr_threshold)
             n_frames = f0.size(1)
         c = c.to(self.dtype)
@@ -463,6 +463,7 @@ class Svc(object):
                 datas = [data]
             
             voice_pkl = np.load("./data/pkl/jvs_ver1/jvs001/parallel100/wav24kHz16bit/VOICEACTRESS100_001.pkl", allow_pickle=True)
+            voice_pkl = voice_pkl.astype(np.float32)
             for k,dat in enumerate(datas):
                 per_length = int(np.ceil(len(dat) / audio_sr * self.target_sample)) if clip_seconds!=0 else length
                 if clip_seconds!=0: 

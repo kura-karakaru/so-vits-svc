@@ -512,9 +512,14 @@ class SynthesizerTrn(nn.Module):
         else:
             if g.dim() == 1:
                 g = g.unsqueeze(0)
+            print(g)
             print(g.dim())
             print(g.size())
-            g = self.emb_g(g).transpose(1, 2)
+            g = self.emb_g(g)
+            g = g.transpose(1, 2)
+            print(g)
+            print(g.dim())
+            print(g.size())
         
         x_mask = torch.unsqueeze(commons.sequence_mask(c_lengths, c.size(2)), 1).to(c.dtype)
         # vol proj
