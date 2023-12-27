@@ -91,7 +91,7 @@
     "use_spectral_norm": false,
     "gin_channels": 768,
     "ssl_dim": 768,
-    "n_speakers": 3,
+    "CLAP_embedding_dim": 512,
     "vocoder_name": "nsf-hifigan",
     "speech_encoder": "vec768l12",
     "speaker_embedding": false,

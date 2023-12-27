@@ -32,12 +32,15 @@ class Slicer:
     # @timeit
     def slice(self, waveform):
         if len(waveform.shape) > 1:
-            samples = librosa.to_mono(waveform)
+            samples = librosa.to_mono(waveform) # monoに変換
         else:
             samples = waveform
-        if samples.shape[0] <= self.min_length:
+        if samples.shape[0] <= self.min_length: # 基準長さより短ければsliceしない
             return {"0": {"slice": False, "split_time": f"0,{len(waveform)}"}}
+
+        # 一定フレームごとにrmsを算出
         rms_list = librosa.feature.rms(y=samples, frame_length=self.win_size, hop_length=self.hop_size).squeeze(0)
+        
         sil_tags = []
         silence_start = None
         clip_start = 0

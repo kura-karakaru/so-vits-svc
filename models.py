@@ -359,7 +359,7 @@ class SynthesizerTrn(nn.Module):
                  upsample_kernel_sizes,
                  gin_channels,
                  ssl_dim,
-                 n_speakers,
+                 CLAP_embedding_dim,
                  sampling_rate=44100,
                  vol_embedding=False,
                  vocoder_name = "nsf-hifigan",
@@ -389,8 +389,9 @@ class SynthesizerTrn(nn.Module):
         self.segment_size = segment_size
         self.gin_channels = gin_channels
         self.ssl_dim = ssl_dim
+        self.CLAP_embedding_dim = CLAP_embedding_dim
         self.vol_embedding = vol_embedding
-        self.emb_g = nn.Embedding(n_speakers, gin_channels)
+        self.emb_g = nn.Linear(CLAP_embedding_dim, gin_channels)
         self.use_depthwise_conv = use_depthwise_conv
         self.use_automatic_f0_prediction = use_automatic_f0_prediction
         self.n_layers_trans_flow = n_layers_trans_flow
@@ -494,7 +495,8 @@ class SynthesizerTrn(nn.Module):
 
     @torch.no_grad()
     def infer(self, c, f0, uv, g=None, noice_scale=0.35, seed=52468, predict_f0=False, vol = None):
-
+        print(g.dim())
+        print(g.size())
         if c.device == torch.device("cuda"):
             torch.cuda.manual_seed_all(seed)
         else:
@@ -510,6 +512,8 @@ class SynthesizerTrn(nn.Module):
         else:
             if g.dim() == 1:
                 g = g.unsqueeze(0)
+            print(g.dim())
+            print(g.size())
             g = self.emb_g(g).transpose(1, 2)
         
         x_mask = torch.unsqueeze(commons.sequence_mask(c_lengths, c.size(2)), 1).to(c.dtype)

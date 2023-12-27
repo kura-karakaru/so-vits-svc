@@ -253,7 +253,7 @@ class Svc(object):
         c = c.unsqueeze(0)
         return c, f0, uv
     
-    def infer(self, speaker, tran, raw_path,
+    def infer(self, speaker, tran, raw_path, voice_pkl,
               cluster_infer_ratio=0,
               auto_predict_f0=False,
               noice_scale=0.4,
@@ -272,18 +272,22 @@ class Svc(object):
         if not hasattr(self,"audio_resample_transform") or self.audio16k_resample_transform.orig_freq != sr:
             self.audio_resample_transform = torchaudio.transforms.Resample(sr,self.target_sample)
         wav = self.audio_resample_transform(wav).numpy()[0]
-        if spk_mix:
+
+        #spk_mix有効時は一旦無視
+        if spk_mix: 
             c, f0, uv = self.get_unit_f0(wav, tran, 0, None, f0_filter,f0_predictor,cr_threshold=cr_threshold)
             n_frames = f0.size(1)
             sid = speaker[:, frame:frame+n_frames].transpose(0,1)
         else:
+            """
             speaker_id = self.spk2id.get(speaker)
             if not speaker_id and type(speaker) is int:
                 if len(self.spk2id.__dict__) >= speaker:
                     speaker_id = speaker
             if speaker_id is None:
                 raise RuntimeError("The name you entered is not in the speaker list!")
-            sid = torch.LongTensor([int(speaker_id)]).to(self.dev).unsqueeze(0)
+            """
+            sid = torch.from_numpy(voice_pkl).to(self.dev).unsqueeze(0)
             c, f0, uv = self.get_unit_f0(wav, tran, cluster_infer_ratio, speaker, f0_filter,f0_predictor,cr_threshold=cr_threshold)
             n_frames = f0.size(1)
         c = c.to(self.dtype)
@@ -377,10 +381,10 @@ class Svc(object):
             if len(self.spk2id) == 1:
                 spk = self.spk2id.keys()[0]
                 use_spk_mix = False
-        wav_path = Path(raw_audio_path).with_suffix('.wav')
-        chunks = slicer.cut(wav_path, db_thresh=slice_db)
-        audio_data, audio_sr = slicer.chunks2audio(wav_path, chunks)
-        per_size = int(clip_seconds*audio_sr)
+        wav_path = Path(raw_audio_path).with_suffix('.wav') # wavファイルのパス
+        chunks = slicer.cut(wav_path, db_thresh=slice_db) # 
+        audio_data, audio_sr = slicer.chunks2audio(wav_path, chunks) # chunksとsamplerateを返す
+        per_size = int(clip_seconds*audio_sr) # clipのサンプル数
         lg_size = int(lg_num*audio_sr)
         lg_size_r = int(lg_size*lgr_num)
         lg_size_c_l = (lg_size-lg_size_r)//2
@@ -457,6 +461,8 @@ class Svc(object):
                 datas = split_list_by_n(data, per_size,lg_size)
             else:
                 datas = [data]
+            
+            voice_pkl = np.load("./data/pkl/jvs_ver1/jvs001/parallel100/wav24kHz16bit/VOICEACTRESS100_001.pkl", allow_pickle=True)
             for k,dat in enumerate(datas):
                 per_length = int(np.ceil(len(dat) / audio_sr * self.target_sample)) if clip_seconds!=0 else length
                 if clip_seconds!=0: 
@@ -467,7 +473,7 @@ class Svc(object):
                 raw_path = io.BytesIO()
                 soundfile.write(raw_path, dat, audio_sr, format="wav")
                 raw_path.seek(0)
-                out_audio, out_sr, out_frame = self.infer(spk, tran, raw_path,
+                out_audio, out_sr, out_frame = self.infer(spk, tran, raw_path, voice_pkl,
                                                     cluster_infer_ratio=cluster_infer_ratio,
                                                     auto_predict_f0=auto_predict_f0,
                                                     noice_scale=noice_scale,
