@@ -365,6 +365,7 @@ class Svc(object):
                         cluster_infer_ratio,
                         auto_predict_f0,
                         noice_scale,
+                        voice_pkl,
                         pad_seconds=0.5,
                         clip_seconds=0,
                         lg_num=0,
@@ -462,8 +463,6 @@ class Svc(object):
             else:
                 datas = [data]
             
-            voice_pkl = np.load("./data/pkl/jvs_ver1/jvs001/parallel100/wav24kHz16bit/VOICEACTRESS100_001.pkl", allow_pickle=True)
-            voice_pkl = voice_pkl.astype(np.float32)
             for k,dat in enumerate(datas):
                 per_length = int(np.ceil(len(dat) / audio_sr * self.target_sample)) if clip_seconds!=0 else length
                 if clip_seconds!=0: 

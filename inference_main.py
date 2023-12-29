@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 
 import soundfile
 
@@ -117,6 +118,8 @@ def main():
             raw_audio_path += ".wav"
         infer_tool.format_wav(raw_audio_path)
         for spk in spk_list:
+            voice_pkl = np.load("./data/pkl/jvs_avg/" + spk + ".pkl", allow_pickle=True)
+            voice_pkl = voice_pkl.astype(np.float32)
             kwarg = {
                 "raw_audio_path" : raw_audio_path,
                 "spk" : spk,
@@ -125,6 +128,7 @@ def main():
                 "cluster_infer_ratio" : cluster_infer_ratio,
                 "auto_predict_f0" : auto_predict_f0,
                 "noice_scale" : noice_scale,
+                "voice_pkl" : voice_pkl,
                 "pad_seconds" : pad_seconds,
                 "clip_seconds" : clip,
                 "lg_num": lg,
