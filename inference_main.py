@@ -118,7 +118,7 @@ def main():
             raw_audio_path += ".wav"
         infer_tool.format_wav(raw_audio_path)
         for spk in spk_list:
-            voice_pkl = np.load("./data/pkl/jvs_avg/" + spk + ".pkl", allow_pickle=True)
+            voice_pkl = np.load("./data/pkl/avg/" + spk + ".pkl", allow_pickle=True)
             voice_pkl = voice_pkl.astype(np.float32)
             kwarg = {
                 "raw_audio_path" : raw_audio_path,

@@ -3,6 +3,9 @@ import multiprocessing
 import os
 import time
 
+import numpy as np
+import pickle
+
 import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
@@ -147,11 +150,25 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
 
     net_g.train()
     net_d.train()
+
+    speaker_vectors = []
+
+    for spk in hps.spk.keys():
+        # config.json内に記載されているspkのpickleファイルを読み込み、データをリストに追加
+        data = np.load("./data/pkl/avg/" + spk + ".pkl", allow_pickle=True)
+        speaker_vectors.append(torch.from_numpy(data).unsqueeze(0).unsqueeze(0))
+            
+
     for batch_idx, items in enumerate(train_loader):
         c, f0, spec, y, spk, lengths, uv,volume = items
-        g = spk.cuda(rank, non_blocking=True)
+        # 話者ベクトルgの入力としてCLAPで抽出したpklを使用
+        g = replace_values(spk, speaker_vectors)
+
+        # for spk_vector in spk_vectors:
+        # g = spk_vector.cuda(rank, non_blocking=True)
         spec, y = spec.cuda(rank, non_blocking=True), y.cuda(rank, non_blocking=True)
         c = c.cuda(rank, non_blocking=True)
+
         f0 = f0.cuda(rank, non_blocking=True)
         uv = uv.cuda(rank, non_blocking=True)
         lengths = lengths.cuda(rank, non_blocking=True)
@@ -254,7 +271,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
                 )
 
             if global_step % hps.train.eval_interval == 0:
-                evaluate(hps, net_g, eval_loader, writer_eval)
+                evaluate(hps, net_g, eval_loader, writer_eval, speaker_vectors)
                 utils.save_checkpoint(net_g, optim_g, hps.train.learning_rate, epoch,
                                       os.path.join(hps.model_dir, "G_{}.pth".format(global_step)))
                 utils.save_checkpoint(net_d, optim_d, hps.train.learning_rate, epoch,
@@ -273,14 +290,14 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
         start_time = now
 
 
-def evaluate(hps, generator, eval_loader, writer_eval):
+def evaluate(hps, generator, eval_loader, writer_eval, speaker_vectors):
     generator.eval()
     image_dict = {}
     audio_dict = {}
     with torch.no_grad():
         for batch_idx, items in enumerate(eval_loader):
             c, f0, spec, y, spk, _, uv,volume = items
-            g = spk[:1].cuda(0)
+            g = replace_values(spk[:1], speaker_vectors).cuda(0)
             spec, y = spec[:1].cuda(0), y[:1].cuda(0)
             c = c[:1].cuda(0)
             f0 = f0[:1].cuda(0)
@@ -324,6 +341,15 @@ def evaluate(hps, generator, eval_loader, writer_eval):
     )
     generator.train()
 
+def replace_values(input_tensor, vector_list):
+    # 入力のuniqueな値を取得
+    unique_values = torch.unique(input_tensor)
+    # 対応するベクトルを取得する辞書を作成
+    mapping = {value.item(): vector_list[i] for i, value in enumerate(unique_values)}
+    # 入力の各要素を対応するベクトルに置き換える
+    output_tensor = torch.cat([mapping[value.item()] for value in input_tensor])
+
+    return output_tensor
 
 if __name__ == "__main__":
     main()

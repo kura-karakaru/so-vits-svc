@@ -24,13 +24,21 @@ model:
   n_chans: 512
   n_hidden: 256
   n_layers: 20
-  n_spk: 3
+  n_spk: 11
   timesteps: 1000
   type: Diffusion
   use_pitch_aug: true
 spk:
-  jvs001: 2
-  jvs002: 1
+  jvs001: 1
+  jvs002: 2
+  jvs003: 3
+  jvs004: 4
+  jvs005: 5
+  jvs006: 6
+  jvs007: 7
+  jvs008: 8
+  jvs009: 9
+  jvs010: 10
   tsukuyomi: 0
 train:
   amp_dtype: fp32
