@@ -29,8 +29,8 @@ model:
   type: Diffusion
   use_pitch_aug: true
 spk:
-  jvs001: 1
-  jvs002: 2
+  jvs001: 2
+  jvs002: 1
   jvs003: 3
   jvs004: 4
   jvs005: 5

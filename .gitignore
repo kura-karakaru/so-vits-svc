@@ -6,7 +6,8 @@
 
 # Custom Ignore
 logs_logs/
-data/
+data/*
+!/data/pkl/avg/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

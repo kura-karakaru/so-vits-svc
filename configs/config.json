@@ -1,16 +1,16 @@
 {
   "train": {
     "log_interval": 200,
-    "eval_interval": 800,
+    "eval_interval": 10000,
     "seed": 1234,
-    "epochs": 5000,
+    "epochs": 10000,
     "learning_rate": 0.0001,
     "betas": [
       0.8,
       0.99
     ],
     "eps": 1e-09,
-    "batch_size": 20,
+    "batch_size": 12,
     "fp16_run": false,
     "half_type": "fp16",
     "lr_decay": 0.999875,
@@ -102,16 +102,6 @@
     "use_transformer_flow": false
   },
   "spk": {
-    "tsukuyomi": 0,
-    "jvs001": 1,
-    "jvs002": 2,
-    "jvs003": 3,
-    "jvs004": 4,
-    "jvs005": 5,
-    "jvs006": 6,
-    "jvs007": 7,
-    "jvs008": 8,
-    "jvs009": 9,
-    "jvs010": 10
+    "tsukuyomi": 0
   }
 }

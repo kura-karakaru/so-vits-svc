@@ -398,6 +398,12 @@ class SynthesizerTrn(nn.Module):
             nn.ReLU(),
             nn.Linear(1024, 1024),
             nn.ReLU(),
+            nn.Linear(1024, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 1024),
+            nn.ReLU(),
             nn.Linear(1024, gin_channels),
         )
         self.use_depthwise_conv = use_depthwise_conv
@@ -472,6 +478,13 @@ class SynthesizerTrn(nn.Module):
     def forward(self, c, f0, uv, spec, g=None, c_lengths=None, spec_lengths=None, vol = None):
         g = self.emb_g(g).transpose(1,2)
 
+        """
+        print("SynthTrn forward:")
+        print(g.size())
+
+        print(g)
+        """
+
         # vol proj
         vol = self.emb_vol(vol[:,:,None]).transpose(1,2) if vol is not None and self.vol_embedding else 0
 
@@ -518,9 +531,16 @@ class SynthesizerTrn(nn.Module):
         else:
             if g.dim() == 1:
                 g = g.unsqueeze(0)
+            """
+            print("SynthTrn infer:")
+            print(g.size())
+            """
             g = self.emb_g(g)
             g = g.transpose(1, 2)
-        
+            """
+            print("SynthTrn infer(after emb_g, transpose):")
+            print(g.size())
+            """
         x_mask = torch.unsqueeze(commons.sequence_mask(c_lengths, c.size(2)), 1).to(c.dtype)
         # vol proj
         
